@@ -16,7 +16,8 @@
       "health_ins": 516,
       "tax": 0,
       "ot_tier_hours": 2,
-      "leave_rule": "base_30"
+      "leave_rule": "base_30",
+      "lunch_mode": "fixed"
     },
     "李弘盛": {
       "title": "助理工程師",
@@ -48,15 +49,15 @@
       "ot_tier_hours": 2,
       "leave_rule": "base_30",
       "holiday_day_rate": 3000,
-      "lunch_fixed": 2000
+      "lunch_fixed": 2000,
+      "holiday_ot_mult": 1.0
     },
     "莊岳倫": {
       "title": "資深工程師",
       "type": "monthly",
       "base": 38000,
       "allowances": {
-        "機車津貼": 1000,
-        "浮動工作獎金": 3000
+        "機車津貼": 1000
       },
       "attendance_bonus": 1000,
       "lunch_mode": "per_day",
@@ -66,7 +67,11 @@
       "ot_tier_hours": 2,
       "leave_rule": "base_30",
       "holiday_day_rate": 2500,
-      "lunch_fixed": 2000
+      "lunch_fixed": 2000,
+      "holiday_ot_mult": 1.0,
+      "default_extras": {
+        "浮動工作獎金": 3000
+      }
     },
     "楊東翰": {
       "title": "工程師",
@@ -80,7 +85,17 @@
       "tax": 0,
       "ot_tier_hours": 3,
       "leave_rule": "workdays",
-      "holiday_day_rate": 2800
+      "holiday_day_rate": 2800,
+      "holiday_ot_mult": 1.33,
+      "half_year_bonus": {
+        "months": [
+          3,
+          8
+        ],
+        "amount": 15000
+      },
+      "weekend_offsets_absence": true,
+      "default_extras": {}
     },
     "張欽煌": {
       "title": "資深工程師",
@@ -106,8 +121,10 @@
   ],
   "lunch_tax_free_cap": 3000,
   "_holidays說明": "國定假日/補假日，用來算當月實際工作天數（楊東翰事假=本薪÷工作天數），請每年維護",
-  "no_lunch_dates": [
+  "_no_lunch說明": "颱風假等全員不給午餐津貼的日期（月薪照領）",
+  "typhoon_dates": [
     "2026-10-23"
   ],
-  "_no_lunch說明": "颱風假等全員不給午餐津貼的日期（月薪照領）"
+  "_typhoon說明": "颱風假：全員不給午餐津貼；月薪照領、楊東翰不算缺勤",
+  "template": "templates/薪資條範本.xlsx"
 }

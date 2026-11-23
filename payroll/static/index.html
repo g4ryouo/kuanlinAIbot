@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>寬林薪資計算</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2933;--mute:#6b7785;--line:#e3e7ec;--brand:#2f6f4f;--warn:#b45309;--warnbg:#fff7e6}
+@media(prefers-color-scheme:dark){:root{--bg:#14181c;--card:#1d2328;--ink:#e6ebf0;--mute:#9aa7b4;--line:#2c353d;--brand:#5fb28a;--warn:#f0b35a;--warnbg:#2b2416}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"PingFang TC","Noto Sans TC",sans-serif}
+header{padding:16px;background:var(--card);border-bottom:1px solid var(--line)}
+h1{margin:0 0 10px;font-size:18px}main{max-width:1000px;margin:0 auto;padding:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,button{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+button{cursor:pointer}button.p{background:var(--brand);color:#fff;border-color:var(--brand)}button:disabled{opacity:.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.net{font-size:20px;font-weight:700;color:var(--brand)}.sub{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:12px 0}
+label{display:block;font-size:12px;color:var(--mute)}label input{width:100%;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:14px}td{padding:3px 0;border-bottom:1px dashed var(--line)}td:last-child{text-align:right}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:640px){.cols{grid-template-columns:1fr}}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:6px 10px;margin:6px 0;font-size:13px}
+.ex{display:flex;gap:6px;margin:4px 0}.ex input{flex:1;min-width:0}
+details summary{cursor:pointer;color:var(--mute);font-size:13px;margin-top:6px}
+</style></head><body>
+<header><h1>寬林薪資計算</h1>
+<div class="bar">
+  <input type="month" id="month">
+  <input type="file" id="file" accept=".xlsx">
+  <button class="p" id="go">讀取打卡紀錄</button>
+  <button class="p" id="dl" disabled>下載薪資條 Excel</button>
+</div>
+<div class="sub" style="margin-top:8px">Google Sheet「檔案 → 下載 → Microsoft Excel (.xlsx)」後上傳。資料只在這台電腦處理，不會上傳到外部。</div>
+</header>
+<main id="out"><p class="sub">選擇月份並上傳打卡紀錄匯出檔。</p></main>
+<script>
+const $=s=>document.querySelector(s);let S=null;
+const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-1);
+$('#month').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const fmt=n=>(n||0).toLocaleString();
+$('#go').onclick=async()=>{
+  const f=$('#file').files[0];if(!f)return alert('請先選擇 .xlsx 檔');
+  const fd=new FormData();fd.append('file',f);fd.append('month',$('#month').value);
+  $('#go').disabled=true;$('#go').textContent='讀取中…';
+  const r=await fetch('/api/load',{method:'POST',body:fd});const j=await r.json();
+  $('#go').disabled=false;$('#go').textContent='讀取打卡紀錄';
+  if(!r.ok)return alert(j.error);
+  S=j;render();recalc();$('#dl').disabled=false;
+};
+function render(){
+  $('#out').innerHTML=S.employees.map((e,i)=>`<div class="card" id="c${i}">
+   <div class="top"><div><b>${e.name}</b> <span class="sub">${e.title}${e.type=='daily'?'・日薪制':''}</span></div>
+   <div class="net" id="net${i}">—</div></div>
+   ${e.warnings.map(w=>`<div class="warn">⚠ ${w}</div>`).join('')}
+   <div class="sub">打卡 ${e.present_days??0} 天${e.night_shifts?`，夜工 ${e.night_shifts} 次（${e.night_dates.map(x=>+x.slice(5,7)+'/'+ +x.slice(8)).join('、')}）`:''}${e.off_dates.length?`，假日出勤 ${e.off_dates.map(x=>+x.slice(5,7)+'/'+ +x.slice(8)).join('、')}`:''}</div>
+   <div class="grid">${Object.entries(e.inputs).filter(([k,v])=>v!==null).map(([k,v])=>`<label>${S.fields.find(f=>f[0]==k)[1]}<input type="number" step="0.5" data-i="${i}" data-k="${k}" value="${v??0}"></label>`).join('')}
+   ${e.type!='daily'&&e.inputs.absent_days!==null?`<label>當月工作天數<input type="number" data-i="${i}" data-wd value="${e.workdays_in_month}"></label>`:''}</div>
+   <details><summary>其他應發項目（浮動獎金、外宿補貼…）</summary><div id="ex${i}">${Object.entries(e.extras).map(([k,v])=>exRow(i,k,v)).join('')}</div>
+   <button onclick="addEx(${i})">＋ 新增項目</button><div class="sub">名稱需與薪資條欄位標題相同（如「外宿補貼」「浮動工作獎金」），才會印在對應欄位。</div></details>
+   ${e.ot_detail.length?`<details><summary>加班申請 ${e.ot_detail.length} 筆${e.ot_already_marked?`（其中 ${e.ot_already_marked} 筆表上已打 V）`:''}</summary>${e.ot_detail.map(o=>`<div class="sub">${o[0]}　${o[1]} 小時　${o[3]||''}${o[2]?'　✔已計算':''}</div>`).join('')}</details>`:''}
+   <div class="cols" id="t${i}"></div></div>`).join('');
+  document.querySelectorAll('input[data-k],input[data-wd]').forEach(x=>x.oninput=recalc);
+}
+const exRow=(i,k,v)=>`<div class="ex"><input placeholder="項目名稱" value="${k}" oninput="recalc()"><input type="number" placeholder="金額" value="${v}" oninput="recalc()"></div>`;
+function addEx(i){$('#ex'+i).insertAdjacentHTML('beforeend',exRow(i,'',0))}
+function collect(){return S.employees.map((e,i)=>{
+  const inputs={};document.querySelectorAll(`input[data-i="${i}"][data-k]`).forEach(x=>inputs[x.dataset.k]=x.value);
+  const wd=document.querySelector(`input[data-i="${i}"][data-wd]`);
+  const extras={};document.querySelectorAll(`#ex${i} .ex`).forEach(r=>{const[a,b]=r.querySelectorAll('input');if(a.value.trim())extras[a.value.trim()]=b.value});
+  return{name:e.name,inputs,extras,workdays_in_month:wd?wd.value:e.workdays_in_month}})}
+let tm;function recalc(){clearTimeout(tm);tm=setTimeout(async()=>{
+  const r=await fetch('/api/calc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({month:S.month,employees:collect()})});
+  const j=await r.json();
+  S.employees.forEach((e,i)=>{const x=j[e.name];if(!x)return;
+   $('#net'+i).textContent='實領 $'+fmt(x['實領']);
+   const t=(title,o,tot)=>`<div><b>${title}</b><table>${Object.entries(o).map(([k,v])=>`<tr><td>${k}</td><td>${fmt(v)}</td></tr>`).join('')}<tr><td><b>合計</b></td><td><b>${fmt(tot)}</b></td></tr></table></div>`;
+   $('#t'+i).innerHTML=t('應發',x['應發'],x['應發合計'])+t('應扣',x['應扣'],x['應扣合計'])})},150)}
+$('#dl').onclick=async()=>{
+  const r=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:S.token,month:S.month,employees:collect()})});
+  if(!r.ok)return alert((await r.json()).error);
+  const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download=S.month+'_寬林薪資條.xlsx';a.click()}
+</script></body></html>
