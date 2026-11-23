@@ -1,0 +1,113 @@
+{
+  "_說明": "每位員工的固定薪資參數。金額數字取自 2026/9、10 月實際薪資條，請核對後再使用。",
+  "company": "寬林有限公司",
+  "pay_day": 5,
+  "lunch_per_day": 150,
+  "employees": {
+    "駱心愉": {
+      "title": "行政專員",
+      "type": "monthly",
+      "base": 27000,
+      "allowances": {
+        "免稅午餐津貼": 2000
+      },
+      "attendance_bonus": 1000,
+      "labor_ins": 833,
+      "health_ins": 516,
+      "tax": 0,
+      "ot_tier_hours": 2,
+      "leave_rule": "base_30"
+    },
+    "李弘盛": {
+      "title": "助理工程師",
+      "type": "monthly",
+      "base": 35000,
+      "allowances": {},
+      "attendance_bonus": 1000,
+      "labor_ins": 313,
+      "health_ins": 1153,
+      "tax": 0,
+      "ot_tier_hours": 2,
+      "leave_rule": "base_30",
+      "lunch_mode": "per_day"
+    },
+    "王永杰": {
+      "title": "資深工程師",
+      "type": "monthly",
+      "base": 43000,
+      "allowances": {
+        "職務加給": 5000,
+        "機車津貼": 2000,
+        "工作獎金": 3000
+      },
+      "attendance_bonus": 2000,
+      "lunch_mode": "per_day",
+      "labor_ins": 1145,
+      "health_ins": 710,
+      "tax": 0,
+      "ot_tier_hours": 2,
+      "leave_rule": "base_30",
+      "holiday_day_rate": 3000,
+      "lunch_fixed": 2000
+    },
+    "莊岳倫": {
+      "title": "資深工程師",
+      "type": "monthly",
+      "base": 38000,
+      "allowances": {
+        "機車津貼": 1000,
+        "浮動工作獎金": 3000
+      },
+      "attendance_bonus": 1000,
+      "lunch_mode": "per_day",
+      "labor_ins": 955,
+      "health_ins": 592,
+      "tax": 0,
+      "ot_tier_hours": 2,
+      "leave_rule": "base_30",
+      "holiday_day_rate": 2500,
+      "lunch_fixed": 2000
+    },
+    "楊東翰": {
+      "title": "工程師",
+      "type": "monthly",
+      "base": 50000,
+      "allowances": {},
+      "attendance_bonus": 0,
+      "lunch_mode": "per_day",
+      "labor_ins": 0,
+      "health_ins": 0,
+      "tax": 0,
+      "ot_tier_hours": 3,
+      "leave_rule": "workdays",
+      "holiday_day_rate": 2800
+    },
+    "張欽煌": {
+      "title": "資深工程師",
+      "type": "daily",
+      "base": 3000,
+      "allowances": {},
+      "attendance_bonus": 0,
+      "lunch_mode": "per_day",
+      "labor_ins": 1050,
+      "health_ins": 651,
+      "tax": 0,
+      "other_deductions": {
+        "行政作業分攤金": 5317
+      },
+      "ot_tier_hours": 3,
+      "leave_rule": "daily",
+      "holiday_day_rate": 3000
+    }
+  },
+  "holidays": [
+    "2026-10-09",
+    "2026-10-26"
+  ],
+  "lunch_tax_free_cap": 3000,
+  "_holidays說明": "國定假日/補假日，用來算當月實際工作天數（楊東翰事假=本薪÷工作天數），請每年維護",
+  "no_lunch_dates": [
+    "2026-10-23"
+  ],
+  "_no_lunch說明": "颱風假等全員不給午餐津貼的日期（月薪照領）"
+}
